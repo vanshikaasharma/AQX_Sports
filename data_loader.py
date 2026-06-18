@@ -65,7 +65,11 @@ def scrape_standings(year):
     soup = BeautifulSoup(clean_html, "lxml")
 
     records = []
-    for conf in ["confs_standings_E", "confs_standings_W"]:
+    table_ids = [
+        "confs_standings_E", "confs_standings_W",
+        "divs_standings_E", "divs_standings_W",
+    ]
+    for conf in table_ids:
         table = soup.find("table", id=conf)
         if table is None:
             continue
@@ -83,7 +87,10 @@ def scrape_standings(year):
                 continue
             records.append({"Team": parts[2], "WinPct": win_pct})
 
-    return pd.DataFrame(records)
+    standings = pd.DataFrame(records)
+    if standings.empty:
+        return standings
+    return standings.drop_duplicates(subset=["Team"], keep="first")
 
 
 # get mvp voting results for a season
